@@ -1,6 +1,6 @@
 from iis_shim.helper import lists, action
-from iis_shim.site as sites
-from iis_shim.app as apps
+import iis_shim.site as sites
+import iis_shim.app as apps
 import logging
 
 log = logging.getLogger(__name__)
