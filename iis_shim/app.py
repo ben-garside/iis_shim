@@ -14,7 +14,7 @@ def get_by_name(name, partial=False):
         a list of apps is returned otherwise a single app
     """
     if not partial:
-        app = lists('APP /name:"{}"'.format(name))
+        app = lists('APP /app.name:"{}"'.format(name))
         if len(app):
             return app[0]
         else:
