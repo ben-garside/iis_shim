@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 def get_all():
     """ return all vdirs
     """
-    vdirs = lists("APVDIR")
+    vdirs = lists("VDIR")
     return vdirs
 
 def get_by_name(name, partial=False):
