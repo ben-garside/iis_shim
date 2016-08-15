@@ -31,7 +31,7 @@ def get_by_pool_name(name, partial=False):
             return None
     else:
         vdirs = lists("WPS")
-        match_vdirs = [vdir for vdir in vdirs if vdir['apppool.name'].lower().find(name) > -1]
+        match_vdirs = [vdir for vdir in vdirs if vdir['apppool.name'].lower().find(name.lower()) > -1]
         return match_vdirs
 
 def length():

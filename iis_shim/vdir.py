@@ -23,7 +23,7 @@ def get_by_name(name, partial=False):
             return None
     else:
         vdirs = lists("VDIR")
-        match_vdirs = [vdir for vdir in vdirs if vdir['VDIR.NAME'].lower().find(name) > -1]
+        match_vdirs = [vdir for vdir in vdirs if vdir['VDIR.NAME'].lower().find(name.lower()) > -1]
         return match_vdirs
 
 def get_by_physicalpath(name, partial=False):
@@ -38,7 +38,7 @@ def get_by_physicalpath(name, partial=False):
             return None
     else:
         vdirs = lists("VDIR")
-        match_vdirs = [vdir for vdir in vdirs if vdir['physicalPath'].lower().find(name) > -1]
+        match_vdirs = [vdir for vdir in vdirs if vdir['physicalPath'].lower().find(name.lower()) > -1]
         return match_vdirs
 
 def get_by_path(name, partial=False):
@@ -53,7 +53,7 @@ def get_by_path(name, partial=False):
             return None
     else:
         vdirs = lists("VDIR")
-        match_vdirs = [vdir for vdir in vdirs if vdir['path'].lower().find(name) > -1]
+        match_vdirs = [vdir for vdir in vdirs if vdir['path'].lower().find(name.lower()) > -1]
         return match_vdirs
 
 def get_by_app_name(name, partial=False):
@@ -68,7 +68,7 @@ def get_by_app_name(name, partial=False):
             return None
     else:
         vdirs = lists("VDIR")
-        match_vdirs = [vdir for vdir in vdirs if vdir['APP.NAME'].lower().find(name) > -1]
+        match_vdirs = [vdir for vdir in vdirs if vdir['APP.NAME'].lower().find(name.lower()) > -1]
         return match_vdirs
 
 def get_by_site_id(id):

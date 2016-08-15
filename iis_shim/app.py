@@ -21,7 +21,7 @@ def get_by_name(name, partial=False):
             return None
     else:
         apps = lists("APP")
-        match_apps = [pool for pool in apps if pool['APP.NAME'].lower().find(name) > -1]
+        match_apps = [pool for pool in apps if pool['APP.NAME'].lower().find(name.lower()) > -1]
         return match_apps
 
 def get_by_site_name(name, partial=False):
@@ -36,7 +36,7 @@ def get_by_site_name(name, partial=False):
             return None
     else:
         apps = lists("APP")
-        match_apps = [pool for pool in apps if pool['APP.NAME'].lower().find(name) > -1]
+        match_apps = [pool for pool in apps if pool['APP.NAME'].lower().find(name.lower()) > -1]
         return match_apps
 
 def get_by_pool_name(name, partial=False):
@@ -51,7 +51,7 @@ def get_by_pool_name(name, partial=False):
             return None
     else:
         apps = lists("APP")
-        match_apps = [pool for pool in apps if pool['APP.NAME'].lower().find(name) > -1]
+        match_apps = [pool for pool in apps if pool['APP.NAME'].lower().find(name.lower()) > -1]
         return match_apps
 
 def get_by_site_name(name, partial=False):
@@ -66,7 +66,7 @@ def get_by_site_name(name, partial=False):
             return None
     else:
         apps = lists("APP")
-        match_apps = [pool for pool in apps if pool['SITE.NAME'].lower().find(name) > -1]
+        match_apps = [pool for pool in apps if pool['SITE.NAME'].lower().find(name.lower()) > -1]
         return match_apps
 
 def length():

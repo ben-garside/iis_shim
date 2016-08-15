@@ -31,7 +31,7 @@ def get_by_name(name, partial=False):
             return None
     else:
         pools = lists("APPPOOL")
-        match_pools = [pool for pool in pools if pool['APPPOOL.NAME'].lower().find(name) > -1]
+        match_pools = [pool for pool in pools if pool['APPPOOL.NAME'].lower().find(name.lower()) > -1]
         return match_pools
 
 def get_by_state(state):

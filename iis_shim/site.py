@@ -29,7 +29,7 @@ def get_by_name(name, partial=False):
             return None
     else:
         sites = lists("Site")
-        match_sites = [site for site in sites if site['SITE.NAME'].lower().find(name) > -1]
+        match_sites = [site for site in sites if site['SITE.NAME'].lower().find(name.lower()) > -1]
         return match_sites
 
 def get_by_state(state):
@@ -49,7 +49,7 @@ def get_by_bindings(binding, partial=False):
             return None
     else:
         sites = lists("Site")
-        match_sites = [site for site in sites if site['bindings'].lower().find(binding) > -1]
+        match_sites = [site for site in sites if site['bindings'].lower().find(binding.lower()) > -1]
         return match_sites
 
 def stop_by_id(id):
