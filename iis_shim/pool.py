@@ -44,7 +44,7 @@ def get_by_state(state):
         return []
 
 def get_by_PipelineMode(mode):
-    modes = ["Integrated", "Classic"]
+    modes = ["integrated", "classic"]
     if mode.lower() in modes:
         pools = lists('APPPOOL /PipelineMode:"{}"'.format(mode.lower()))
         return pools
