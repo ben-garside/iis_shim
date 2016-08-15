@@ -16,7 +16,7 @@ def get_by_name(name, partial=False):
         a list of vdirs is returned otherwise a single vdir
     """
     if not partial:
-        vdir = lists('VDIR /name:"{}"'.format(name))
+        vdir = lists('VDIR /vdir.name:"{}"'.format(name))
         if len(vdir):
             return vdir[0]
         else:
