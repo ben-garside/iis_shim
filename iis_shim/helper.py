@@ -5,12 +5,23 @@ import logging
 
 log = logging.getLogger(__name__)
 
-def lists(action, style="/XML"):
+def lists(action, style="/XML", processXml=True):
     cmd = "{} LIST {} {}".format(APP_CMD, action, style)
     output = run(cmd)
+    if processXml:
+        output = process_xml(output)
+    return output
+
+def action(action, prop, name, style="/XML", processXml=True):
+    cmd = '{} {} {} "{}" {}'.format(APP_CMD, action, prop, name, style)
+    output = run(cmd)
+    if processXml:
+        output = process_xml(output)
     return output
 
 def process_xml(xmlString):
+    if xmlString.endswith("None"):
+        xmlString = xmlString[:-4]
     try:
         tree = ET.fromstring(xmlString)
         splitResult = [item.attrib for item in tree if len(item.attrib) > 0]

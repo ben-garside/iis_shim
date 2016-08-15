@@ -1,130 +1,73 @@
+from iis_shim.helper import lists, action
 import logging
-from iis_shim.config import *
-from iis_shim.handler import run, _get_property
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
-class SitesObject():
-    def __init__(self):
-        logger.debug("Created SitesObject")
-        self._list = []
-        self._list = self.g
-        pass
-    def _get_sites(self):
-        logger.debug("getting sites from IIS")
-        sites = _get_property(APP_CMD, 'SITE')
-        site_list = list(map(SiteObject, sites))
-        logger.debug("Finished fetching sites from IIS")
-        return site_list
-    @property
-    def list(self):
-        # return self._get_sites()
-        return self._list # this only gets the site once, helps with optimization
-    @property
-    def length(self):
-        return len(self._get_sites())
-    def find_by_id(self, id):
-        """returns single site or None"""
-        for site in self._get_sites():
-            if str(id) == site.id:
-                return site
-        return None
-    def find_by_name(self, name, partial=True):
-        """returns array of matched sites"""
-        match = []
-        for site in self._get_sites():
-            if partial:
-                if name.lower() in site.name.lower():
-                    match.append(site)
-            else:
-                if name.lower() == site.name.lower():
-                    match.append(site)
-        return match
-    def find_by_state(self, state):
-        match = []
-        for site in self._get_sites():
-            if state.lower() == site.state.lower():
-                match.append(site)
-        return match
-    def find_by_binding(self, binding, partial=True):
-        match = []
-        for site in self._get_sites():
-            if partial:
-                if binding.lower() in site.binding.lower():
-                    match.append(site)
-            else:
-                if binding.lower() == site.binding.lower():
-                    match.append(site)
-        return match
+def get_all():
+    """ return all sites
+    """
+    sites = lists("Site")
+    return sites
 
-class SiteObject():
-    def __init__(self, siteDict):
-        self._id = siteDict['SITE.ID']
-        self._state = siteDict['state']
-        self._name = siteDict['SITE.NAME']
-        self._binding = siteDict['bindings']
-        logger.debug("Found Site: {} - {}".format(self._id, self._name))
+def get_by_id(id):
+    """ return site by id
+    """
+    site = lists("Site /id:{}".format(id))
+    if len(site):
+        return site[0]
+    return None
 
-    @property
-    def id(self):
-        self._refresh(prop="name", val=self._name)
-        return self._id
-    @property
-    def name(self):
-        self._refresh(prop="id", val=self._id)
-        return self._name
-    @property
-    def state(self):
-        self._refresh()
-        return self._state
-    @property
-    def binding(self):
-        self._refresh()
-        return self._binding
+def get_by_name(name, partial=False):
+    """ return site by name, if partial is true
+        a list of sites is returned otherwise a single site
+    """
+    if not partial:
+        site = lists('Site /name:"{}"'.format(name))
+        if len(site):
+            return site[0]
+        else:
+            return None
+    else:
+        sites = lists("Site")
+        match_sites = [site for site in sites if site['SITE.NAME'].lower().find(name) > -1]
+        return match_sites
 
-    def _refresh(self, prop=None, val=None):
-        prop = prop or "id"
-        val = val or self.id
-        query = "SITE /{}:{}".format(prop, val)
-        site = _get_property(APP_CMD, query)[0]
-        self.id = site['SITE.ID']
-        self.state = site['state']
-        self.name = site['SITE.NAME']
-        self.binding = site['bindings']
-        logger.info("Refreshed Site: {} - {}".format(self.id, self.name))
-        
-    def _refreshs(self):
-        target = 'SITE /name:"{}"'.format(self.name)
-        site = _get_property(APP_CMD, target)[0]
-        self.id = site['SITE.ID']
-        self.state = site['state']
-        self.name = site['SITE.NAME']
-        self.binding = site['bindings']
-        logger.info("refreshed Site Object")
+def get_by_state(state):
+    states = ["started", "stopped"]
+    if state.lower() in states:
+        sites = lists('Site /state:"{}"'.format(state.lower()))
+        return sites
+    else:
+        log.error("Invalid state. use 'Started' or 'Stopped'")
+        return []
+def get_by_bindings(binding, partial=False):
+    if not partial:
+        site = lists('Site /bindings:"{}"'.format(binding))
+        if len(site):
+            return site[0]
+        else:
+            return None
+    else:
+        sites = lists("Site")
+        match_sites = [site for site in sites if site['bindings'].lower().find(binding) > -1]
+        return match_sites
 
-    def __repr__(self):
-        return self.id + ' ' + self.name
+def stop_by_id(id):
+    site = get_by_id(id)
+    if site:
+        output = action("STOP", "Site", site['SITE.NAME'])
+        if len(output):
+            return output[0]
+    return None
 
-    def stop(self):
-        cmd = '{} STOP SITE "{}"'.format(APP_CMD, self.name)
-        result = run(cmd)
-        self._refresh()
-        logger.info("Stopped: {}".format(self.name))
-        logger.info("State: {} for {}".format(self.state, self.name))
-        return result
-    
-    def start(self):
-        cmd = '{} START SITE "{}"'.format(APP_CMD, self.name)
-        result = run(cmd)
-        self._refresh()
-        logger.info("Started: {}".format(self.name))
-        logger.info("State: {} for {}".format(self.state, self.name))
-        return result
-    
-    def set(self, prop):
-        pass
+def start_by_id(id):
+    site = get_by_id(id)
+    if site:
+        output = action("START", "Site", site['SITE.NAME'])
+        if len(output):
+            return output[0]
+    return None
 
-    def app(self):
-        pass
-
-Sites = SitesObject()
+def length():
+    """ return number of sites """
+    return len(get_all())

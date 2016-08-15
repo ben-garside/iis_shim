@@ -1,82 +1,83 @@
-import os
-from iis_shim.handler import run, _get_property
-# from .helper import _get_property, run
-# from .wp import Wps
-from iis_shim.config import *
+from iis_shim.helper import lists, action
+import iis_shim.site as sites
+import iis_shim.app as apps
+import logging
 
-class PoolsObject():
-    def __init__(self):
-        pass
-    def _get_pools(self):
-        pools = _get_property(APP_CMD, 'APPPOOL')
-        return list(map(PoolObject, pools))
-    @property
-    def list(self):
-        return self._get_pools()
+log = logging.getLogger(__name__)
 
-    @property
-    def length(self):
-        return len(self._get_pools())
+def get_all():
+    """ return all apppools
+    """
+    pools = lists("APPPOOL")
+    return pools
 
-    def find_by_name(self, name, partial=True):
-        """returns array of matched pools"""
-        match = []
-        for pool in self._get_pools():
-            if partial:
-                if name.lower() in pool.name.lower():
-                    match.append(pool)
-            else:
-                if name.lower() == pool.name.lower():
-                    match.append(pool)
-        return match
+def get_by_runtimeverion(verion):
+    """ return pool by RuntimeVersion
+    """
+    pool = lists('APPPOOL /RuntimeVersion:"{}"'.format(verion))
+    if len(pool):
+        return pool[0]
+    return None
 
-class PoolObject():
-    def __init__(self, poolDict):
-        self.name = poolDict['APPPOOL.NAME']
-        self.state = poolDict['state']
-        self.runtimeVersion = poolDict['RuntimeVersion']
-        self.pipelineMode = poolDict['PipelineMode']
-    
-    def _refresh(self):
-        target = 'APPPOOL /name:"{}"'.format(self.name)
-        pool = _get_property(APP_CMD, target)[0]
+def get_by_name(name, partial=False):
+    """ return pool by name, if partial is true
+        a list of pools is returned otherwise a single pool
+    """
+    if not partial:
+        pool = lists('APPPOOL /name:"{}"'.format(name))
+        if len(pool):
+            return pool[0]
+        else:
+            return None
+    else:
+        pools = lists("APPPOOL")
+        match_pools = [pool for pool in pools if pool['APPPOOL.NAME'].lower().find(name) > -1]
+        return match_pools
 
-        self.name = pool['APPPOOL.NAME']
-        self.state = pool['state']
-        self.runtimeVersion = pool['RuntimeVersion']
-        self.pipelineMode = pool['PipelineMode']
+def get_by_state(state):
+    states = ["started", "stopped"]
+    if state.lower() in states:
+        pools = lists('APPPOOL /state:"{}"'.format(state.lower()))
+        return pools
+    else:
+        log.error("Invalid state. use 'Started' or 'Stopped'")
+        return []
 
-    def start(self):
-        cmd = '{} START APPPOOL "{}"'.format(APP_CMD, self.name)
-        result = run(cmd)
-        self._refresh()
-        return result
-    
-    def stop(self):
-        cmd = '{} STOP APPPOOL "{}"'.format(APP_CMD, self.name)
-        result = run(cmd)
-        self._refresh()
-        return result
-    
-    def recycle(self):
-        cmd = '{} RECYCLE APPPOOL "{}"'.format(APP_CMD, self.name)
-        result = run(cmd)
-        self._refresh()
-        return result
-    
-    def add(self):
-        pass
-    
-    def delete(self):
-        pass
-    
-    def set(self):
-        pass
-    
-    def wp(self):
-        return Wps.find_by_poolname(self.name, partial=False)[0]
+def get_by_PipelineMode(mode):
+    modes = ["Integrated", "Classic"]
+    if mode.lower() in modes:
+        pools = lists('APPPOOL /PipelineMode:"{}"'.format(mode.lower()))
+        return pools
+    else:
+        log.error("Invalid mode. use 'Integrated' or 'Classic'")
+        return []
 
-    def __repr__(self):
-        return self.state + ' ' + self.name
+def get_by_site_id(id):
+    site = sites.get_by_id(id)
+    if site:
+        app = apps.get_by_site_name(site['SITE.NAME'])
+        if app:
+            pool = get_by_name(app['APPPOOL.NAME'])
+            if pool:
+                return pool
+    return None
 
-Pools = PoolsObject()
+def stop_by_site_id(id):
+    pool = get_by_site_id(id)
+    if pool:
+        output = action("STOP", "APPPOOL", pool['APPPOOL.NAME'])
+        if len(output):
+            return output[0]
+    return None
+
+def start_by_site_id(id):
+    pool = get_by_site_id(id)
+    if pool:
+        output = action("START", "APPPOOL", pool['APPPOOL.NAME'])
+        if len(output):
+            return output[0]
+    return None
+
+def length():
+    """ return number of pools """
+    return len(get_all())
