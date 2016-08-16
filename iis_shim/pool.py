@@ -16,7 +16,7 @@ def get_by_runtimeverion(verion):
     """
     pool = lists('APPPOOL /RuntimeVersion:"{}"'.format(verion))
     if len(pool):
-        return pool[0]
+        return pool
     return None
 
 def get_by_name(name, partial=False):
