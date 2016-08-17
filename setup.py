@@ -9,7 +9,7 @@ Link
 """
 from distutils.core import setup
 
-version = "0.1.4"
+version = "0.1.5"
 
 setup(
     name="iis_shim",
