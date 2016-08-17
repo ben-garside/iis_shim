@@ -9,19 +9,23 @@ def run(cmd, errMsg=None):
     """ run given commands in a subprocess
     """
     try:
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, err = proc.communicate()
         if type(output) == bytes:
             output = output.decode(encoding='UTF-8')
+        logger.debug("Output: {}".format(output))
+        logger.debug("Return Code: {}".format(proc.returncode))
         if "[Error]" in output or proc.returncode != 0:
+            logger.debug("errMsg: {}".format(errMsg))
+            logger.debug("err: {}".format(err))
             if errMsg:
-                # raise Exception(errMsg)
                 return errMsg
             else:
-                return "%s\r\n%s" % (output, err)
+                return "%s\r\n%s" % (output, err.decode("utf-8"))
         return output
-    except Exception:
-        return Exception
+    except Exception as e:
+        logger.error("Exception running 'run': {}".format(e))
+        return None
 
 def _get_property(APP_CMD, prop):
     if os.path.isfile(APP_CMD):
